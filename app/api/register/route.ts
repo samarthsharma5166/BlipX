@@ -6,7 +6,6 @@ import Error from 'next/error'
 export async function POST(req: Request,res: Response) {
     try {
         const body = await req.json()
-        console.log(body)
         const { email, name, password } = body  
 
         if(!email || !name || !password){

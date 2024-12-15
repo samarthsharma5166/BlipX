@@ -1,6 +1,7 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import prisma from '@/app/libs/prismaDb'
+import { pusherServer } from "@/app/libs/pusher";
 
 export async function POST(request: Request) {
     try {
@@ -13,13 +14,11 @@ export async function POST(request: Request) {
             name
         } = body;
 
-        console.log("validating user")
 
         if (!currentUser?.id || !currentUser?.email) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        console.log("validating group");
 
 
         if (isGroup && (!members  || members.length<2 || !name)){
@@ -46,10 +45,14 @@ export async function POST(request: Request) {
                     users:true
                 }
             })
+            newConversation.users.forEach((user) => {
+                if(user.email){
+                    pusherServer.trigger(user.email,'conversation:new',newConversation)
+                }
+            })
             return NextResponse.json(newConversation)
         }   
 
-        console.log("existingConversations");
         const existingConversations = await prisma.conversation.findMany({
           where: {
             OR: [
@@ -70,9 +73,7 @@ export async function POST(request: Request) {
       
 
         const singleConversation = existingConversations[0];
-        console.log(singleConversation);
         if (singleConversation) {
-            console.log("existingConversations");
             return NextResponse.json(singleConversation);
         }
 
@@ -86,7 +87,16 @@ export async function POST(request: Request) {
                 users:true
             }
         })
-        console.log("newConversation");
+
+        newConversation.users.map((user)=>{
+            if(user.email){
+                pusherServer.trigger(
+                  user.email,
+                  'conversation:new',
+                  newConversation
+                );
+            }
+        })
 
         return NextResponse.json(newConversation)
     }catch(error:any){

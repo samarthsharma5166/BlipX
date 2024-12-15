@@ -7,7 +7,7 @@ const Home =() => {
     const {isOpen} = useConversation();
     return(
         <div className={clsx("lg:pl-80 h-full",isOpen?"hidden" : "block") }>
-            <EmptyState/>
+            <EmptyState/> 
         </div>
     )
 };

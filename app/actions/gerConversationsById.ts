@@ -4,11 +4,9 @@ import getCurrentUser from './getCurrentUser';
 const getConversationsById = async (conversationId:string) => {
     try {
         const currentUser = await getCurrentUser();
-
         if(!currentUser?.email){
             return null;
         }
-
         const conversation = await prisma.conversation.findUnique({
             where:{
                 id: conversationId
@@ -18,7 +16,11 @@ const getConversationsById = async (conversationId:string) => {
             }
         })
 
-        return conversation;
+        if(!conversation){
+            return null;
+        }
+        
+        return conversation
     } catch (error) {
         console.log(error)
         return null

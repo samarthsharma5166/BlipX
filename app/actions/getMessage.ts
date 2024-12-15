@@ -14,6 +14,7 @@ const getMessage = async (conversationId: string) => {
                 createdAt:'asc'
             }
         })
+        return message
     } catch (error) {
         console.log(error)
         return [];
